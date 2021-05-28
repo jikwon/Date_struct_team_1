@@ -1,4 +1,4 @@
-~~~
+'''
 #pragma once
 #include <iostream>
 
@@ -60,4 +60,4 @@ public:
 		delete[] map;
 	}
 };
-~~~
+'''
