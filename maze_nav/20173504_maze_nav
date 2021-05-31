@@ -1,1 +1,124 @@
+#include<stdio.h>
+#include<conio.h>
+#include<Windows.h>
+#include<iostream>
+
+using namespace std;
+//////////////////////////////////////////////////////
+#define WALL 1
+#define WALL2 3
+#define GOAL 6
+#define NULL 0
+#define Y 0
+#define X 1
+#define CHARACTER 2
+#define LEFT 75
+#define RIGHT 77
+#define UP 72
+#define DOWN 80
+#define WIDTH 15
+#define HEIGHT 15
+
+void Init(int character[], int map[][15])
+{
+	for (int y = 0;y < HEIGHT; y++)
+	{
+		for (int x = 0; x < WIDTH; x++)
+		{
+			if (map[y][x] == CHARACTER)
+				character[X] = x;
+				character[Y] = y;
+		}
+	}
+}
+
+void MapDraw(int map[][15])
+{
+	for (int y = 0; y < HEIGHT; y++)
+	{
+		for (int x = 0; x < WIDTH; x++)
+		{
+			if (map[y][x] == WALL)
+				cout << "□";
+			else if (map[y][x] == CHARACTER)
+				cout << "★";
+			else if (map[y][x] == GOAL)
+				cout <<"☆";
+			else if (map[y][x] == NULL)
+				cout<<"  ";
+		}
+		cout<<endl;
+	}
+}
+
+void Move(int character_Point[], int character[], int map[][15])
+{
+	int LastObjectindex = NULL;
+	char ch = getch();
+	system("cls");
+	character_Point[Y] = character[Y];
+	character_Point[X] = character[X];
+	map[character[Y]][character[X]] = LastObjectindex;
+	switch (ch)
+	{
+	case LEFT:
+		if (map[character[Y]][character[X] - 1] != WALL)
+			character[X]--;
+		break;
+
+	case RIGHT:
+		if (map[character[Y]][character[X] + 1] != WALL)
+			character[X]++;
+		break;
+	case UP:
+		if (map[character[Y] - 1][character[X]] != WALL)
+			character[Y]--;
+		break;
+	case DOWN:
+		if (map[character[Y] + 1][character[X]] != WALL)
+			character[Y]++;
+		break;
+	}
+	LastObjectindex = map[character[Y]][character[X]];
+	map[character[Y]][character[X]] = CHARACTER;
+}
+
+int main()
+{
+	int Map[HEIGHT][WIDTH] = {
+{ 1,1,1,1,1,1,1,0,1,1,1,1,0,0,0 },
+{ 0,0,0,0,0,0,0,0,0,0,0,0,0,1,0 },
+{ 1,0,1,0,1,1,1,1,1,1,1,1,1,1,0 },
+{ 1,0,1,0,0,0,0,1,0,0,0,0,0,1,0 },
+{ 1,0,1,0,1,1,0,1,1,0,1,1,1,1,0 },
+{ 1,0,1,0,1,1,0,1,1,0,1,1,0,1,0 },
+{ 1,0,1,0,1,1,0,1,1,0,1,1,0,1,0 },
+{ 1,0,1,0,1,1,1,1,1,0,0,0,0,1,0 },
+{ 1,0,1,0,1,1,0,1,1,1,1,0,0,1,0 },
+{ 1,0,1,0,0,0,0,1,1,0,0,0,0,1,0 },
+{ 1,0,1,0,1,1,0,1,1,0,1,1,0,1,0 },
+{ 1,0,1,0,1,1,0,1,1,0,1,1,0,1,0 },
+{ 1,0,1,0,1,1,0,1,1,0,1,1,1,1,1 },
+{ 1,0,1,0,1,1,0,0,0,0,1,0,0,0,6 },
+{ 2,0,1,0,0,1,0,1,1,1,1,1,1,1,1 } };
+
+	int character[2];
+	int character_point[2];
+
+	while (1)
+	{
+		cout << "미로찾기 게임" << endl;
+		system("pause");
+		system("cls");
+		break;
+	}
+	Init(character,Map);
+	while (1)
+	{
+		MapDraw(Map);
+		Move(character_point, character, Map);
+	}
+
+	return 0;
+}
 
