@@ -1,124 +1,171 @@
-#include<stdio.h>
-#include<conio.h>
-#include<Windows.h>
-#include<iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
 
-using namespace std;
-//////////////////////////////////////////////////////
-#define WALL 1
-#define WALL2 3
-#define GOAL 6
-#define NULL 0
-#define Y 0
-#define X 1
+#define MAX_SIZE 100
+#define MAZE_SIZE 17
 #define CHARACTER 2
-#define LEFT 75
-#define RIGHT 77
-#define UP 72
-#define DOWN 80
-#define WIDTH 15
-#define HEIGHT 15
+#define GOAL 6
+#define WALL 1
+#define WAY 0
 
-void Init(int character[], int map[][15])
+using std::cout;
+using std::endl;
+
+typedef struct Point
 {
-	for (int y = 0;y < HEIGHT; y++)
+	int x;
+	int y;
+}Point;
+
+typedef struct Stack
+{
+	Point data[MAX_SIZE];
+	int top;
+}Stack;
+
+int maze[MAZE_SIZE][MAZE_SIZE] = {
+{ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+{ 1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,1},
+{ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1},
+{ 1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,0,1},
+{ 1,1,0,1,0,0,0,0,1,0,0,0,0,0,1,0,1},
+{ 1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,0,1},
+{ 1,1,0,1,0,1,1,0,1,1,0,1,1,0,1,0,1},
+{ 1,1,0,1,0,1,1,0,1,1,0,1,1,0,1,0,1},
+{ 1,1,0,1,0,1,1,1,1,1,0,0,0,0,1,0,1},
+{ 1,1,0,1,0,1,1,0,1,1,1,1,0,0,1,0,1},
+{ 1,1,0,1,0,0,0,0,1,1,0,0,0,0,1,0,1},
+{ 1,1,0,1,0,1,1,0,1,1,0,1,0,0,1,0,1},
+{ 1,1,0,1,0,1,1,0,1,1,0,1,0,0,1,0,1},
+{ 1,1,0,1,0,1,1,0,1,1,0,1,0,1,1,1,1},
+{ 1,1,0,1,0,1,1,0,0,0,0,1,0,0,0,6,1},
+{ 1,2,0,1,0,0,1,0,1,1,1,1,1,1,1,1,1},
+{ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+};
+void init(Stack* p)
+{
+	p->top = -1;
+}
+int is_full(Stack* p)
+{
+	return (p->top == MAX_SIZE - 1);
+}
+
+int is_empty(Stack* p)
+{
+	return (p->top == -1);
+}
+
+void push(Stack* p, Point data)
+{
+	if (is_full(p))
 	{
-		for (int x = 0; x < WIDTH; x++)
-		{
-			if (map[y][x] == CHARACTER)
-				character[X] = x;
-				character[Y] = y;
-		}
+		cout << "스택이 꽉찼습니다" << endl;
+		return;
+	}
+	else
+	{
+		p->top++;
+		p->data[p->top].x = data.x;
+		p->data[p->top].y = data.y;
 	}
 }
 
-void MapDraw(int map[][15])
+Point pop(Stack* p)
 {
-	for (int y = 0; y < HEIGHT; y++)
+	if(is_empty(p))
 	{
-		for (int x = 0; x < WIDTH; x++)
-		{
-			if (map[y][x] == WALL)
-				cout << "□";
-			else if (map[y][x] == CHARACTER)
-				cout << "★";
-			else if (map[y][x] == GOAL)
-				cout <<"☆";
-			else if (map[y][x] == NULL)
-				cout<<"  ";
-		}
-		cout<<endl;
+		cout<<"스택이 비어있습니다"<<endl;
+		exit(1);
 	}
+
+	return p->data[(p->top)--];
 }
 
-void Move(int character_Point[], int character[], int map[][15])
+void FindWay(Stack* s, int x, int y)
 {
-	int LastObjectindex = NULL;
-	char ch = getch();
-	system("cls");
-	character_Point[Y] = character[Y];
-	character_Point[X] = character[X];
-	map[character[Y]][character[X]] = LastObjectindex;
-	switch (ch)
+	if (x < 0 || y < 0 || x > MAZE_SIZE || y > MAZE_SIZE)
+		return;
+	if (maze[x][y] != WALL && maze[x][y] != '.')
 	{
-	case LEFT:
-		if (map[character[Y]][character[X] - 1] != WALL)
-			character[X]--;
-		break;
-
-	case RIGHT:
-		if (map[character[Y]][character[X] + 1] != WALL)
-			character[X]++;
-		break;
-	case UP:
-		if (map[character[Y] - 1][character[X]] != WALL)
-			character[Y]--;
-		break;
-	case DOWN:
-		if (map[character[Y] + 1][character[X]] != WALL)
-			character[Y]++;
-		break;
+		Point tmp;
+		tmp.x = x;
+		tmp.y = y; push(s, tmp);
 	}
-	LastObjectindex = map[character[Y]][character[X]];
-	map[character[Y]][character[X]] = CHARACTER;
 }
-
 int main()
 {
-	int Map[HEIGHT][WIDTH] = {
-{ 1,1,1,1,1,1,1,0,1,1,1,1,0,0,0 },
-{ 0,0,0,0,0,0,0,0,0,0,0,0,0,1,0 },
-{ 1,0,1,0,1,1,1,1,1,1,1,1,1,1,0 },
-{ 1,0,1,0,0,0,0,1,0,0,0,0,0,1,0 },
-{ 1,0,1,0,1,1,0,1,1,0,1,1,1,1,0 },
-{ 1,0,1,0,1,1,0,1,1,0,1,1,0,1,0 },
-{ 1,0,1,0,1,1,0,1,1,0,1,1,0,1,0 },
-{ 1,0,1,0,1,1,1,1,1,0,0,0,0,1,0 },
-{ 1,0,1,0,1,1,0,1,1,1,1,0,0,1,0 },
-{ 1,0,1,0,0,0,0,1,1,0,0,0,0,1,0 },
-{ 1,0,1,0,1,1,0,1,1,0,1,1,0,1,0 },
-{ 1,0,1,0,1,1,0,1,1,0,1,1,0,1,0 },
-{ 1,0,1,0,1,1,0,1,1,0,1,1,1,1,1 },
-{ 1,0,1,0,1,1,0,0,0,0,1,0,0,0,6 },
-{ 2,0,1,0,0,1,0,1,1,1,1,1,1,1,1 } };
+	Stack s;
+	Point m;
+	int i, j, x, y;
+	init(&s);
 
-	int character[2];
-	int character_point[2];
+	// 시작점 탐색 
 
-	while (1)
+	for (i = 0;i < MAZE_SIZE;i++)
 	{
-		cout << "미로찾기 게임" << endl;
-		system("pause");
-		system("cls");
-		break;
+		for (j = 0;j < MAZE_SIZE;j++)
+		{
+			if (maze[i][j] == CHARACTER)
+			{
+				m.x = i;
+				m.y = j;
+			}
+		}
 	}
-	Init(character,Map);
-	while (1)
+	cout << "미로" << endl;
+	for (int i = 0; i < MAZE_SIZE; i++)
 	{
-		MapDraw(Map);
-		Move(character_point, character, Map);
+		for (int j = 0; j < MAZE_SIZE; j++)
+		{
+			if (maze[i][j] == WAY)
+			{
+				cout << "  ";
+			}
+			else if (maze[i][j] == WALL)
+			{
+				cout<<"■";
+			}
+			else if(maze[i][j] == CHARACTER)
+			{
+				cout << "★";
+			}
+			else if (maze[i][j] == GOAL)
+			{
+				cout << "☆";
+			}
+		}
+		cout << endl;
 	}
+	cout<<"이동 경로"<<endl;
+	cout << "시작 (" << m.x << "," << m.y << ")";
 
+	while (maze[m.x][m.y] != GOAL)
+	{
+		x = m.x;
+		y = m.y;
+		maze[x][y] = '.'; // 방문한 곳을 표시
+
+		// 이동 가능한 곳을 탐색
+		FindWay(&s, x + 1, y);
+		FindWay(&s, x - 1, y);
+		FindWay(&s, x, y + 1);
+		FindWay(&s, x, y - 1);
+
+		if (is_empty(&s))
+		{
+			cout<<"이동경로를 찾을 수 없습니다. 실패"<<endl;
+			return 0;
+		}
+		else
+		{
+			m = pop(&s); // 현재 좌표를 변경 
+			cout <<"(" <<m.x << "," << m.y<<")";
+		}
+	}
+	cout << "도착" << endl;
+	cout << "탐색성공" << endl;
 	return 0;
 }
 
