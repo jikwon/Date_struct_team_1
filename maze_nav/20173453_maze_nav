@@ -1,78 +1,89 @@
 #include <iostream>
-#include <fstream>
 #include <stack>
 using namespace std;
+const int MAXSIZE = 100;
+bool maze[MAXSIZE + 2][MAXSIZE + 2] = { 0 };	//
+bool mark[MAXSIZE + 1][MAXSIZE + 1] = { 0 };	//
 
-int main() {
-	int test_case;
-	int miro[16][16];
-	int s_Row, s_Col, cur_r, cur_c;
-	char ch;
+enum directions { N, NE, E, SE, S, SW, W, NW };	// enum 사용법
+struct offsets
+{
+	int a, b;
+}m_ove[8] = { -1,0, -1,1, 0,1, 1,1, 1,0, 1,-1, 0,-1, -1,-1 };	// 존나 이해는 안되지만
 
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
-	cout.tie(NULL);
+struct Items
+{
+	Items(int xx = 0, int yy = 0, int dd = 0) :x(xx), y(yy), dir(dd) {}
+	int x, y, dir;
+};
 
-	for (int T = 1; T <= 10; T++) {
-		cin >> test_case;
-		cin.get(ch);
-		for (int row = 0; row < 16; row++) {
-			\
-				for (int col = 0; col < 16; col++) {
-					int input = cin.get();
-					miro[row][col] = input - 48;
-					if (input - 48 == 2) {
-						s_Row = row; s_Col = col;
-					}
-				}
-			cin.get(ch);
-		}
-		// 탐색 시작		
-		stack<pair<int, int>> s; // row,col pair를 stack에 저장
-		cur_r = s_Row; cur_c = s_Col;
-		s.push(pair<int, int>(cur_r, cur_c)); // 시작 위치를 stack에 삽입
+template<class T>
+ostream& operator<<(ostream& os, stack<T>& s) {
 
-		while (1) {
-			miro[cur_r][cur_c] = 8;
-
-			// 오른쪽이 뚫려있을 경우
-			if (miro[cur_r][cur_c + 1] == 0 && s.top() != pair<int, int>(cur_r, cur_c + 1)) {
-				s.push(pair<int, int>(cur_r, cur_c));
-				cur_c = cur_c + 1;
-			}
-			// 왼쪽이 뚫려있을 경우
-			else if (miro[cur_r][cur_c - 1] == 0 && s.top() != pair<int, int>(cur_r, cur_c - 1)) {
-				s.push(pair<int, int>(cur_r, cur_c));
-				cur_c = cur_c - 1;
-			}
-			// 아래쪽이 뚫려있을 경우
-			else if (miro[cur_r + 1][cur_c] == 0 && s.top() != pair<int, int>(cur_r + 1, cur_c)) {
-				s.push(pair<int, int>(cur_r, cur_c));
-				cur_r = cur_r + 1;
-			}
-			// 위쪽이 뚫려있을 경우
-			else if (miro[cur_r - 1][cur_c] == 0 && s.top() != pair<int, int>(cur_r - 1, cur_c)) {
-				s.push(pair<int, int>(cur_r, cur_c));
-				cur_r = cur_r - 1;
-			}
-
-			else if (miro[cur_r][cur_c + 1] == 3 || miro[cur_r][cur_c - 1] == 3 ||
-				miro[cur_r + 1][cur_c] == 3 || miro[cur_r - 1][cur_c] == 3) {
-				cout << "#" << T << " " << 1 << "\n";
-				break;
-			}
-
-			else {
-				cur_r = s.top().first;
-				cur_c = s.top().second;
-				s.pop();
-			}
-
-			if (s.empty()) {
-				cout << "#" << T << " " << 0 << "\n";
-				break;
-			}
-		}
+	stack<T> tmp;			// 저장할 stack 임시 생성
+	while (!s.empty()) {	// s의 stack을 temp로 옮기는 과정
+		tmp.push(s.top());	// temp에 넣고
+		s.pop();			// s거 pop
 	}
+	while (!tmp.empty()) {	// temp의 stack을 출력
+		os << "->";
+		os << tmp.top();	// 이것도 구현해주어야함
+		tmp.pop();
+	}
+	return os;
+}
 
+ostream& operator<<(ostream& os, Items& item) {
+	static int count = 0;
+	os << "(" << item.x << "," << item.y << ")";
+	count++; if ((count % 5) == 0)os << endl; // 5개씩 끊기 무시
+	return os;
+}
+
+void Path(const int m, const int p) {
+	mark[1][1] = 1; // 출발 지점 1체크!
+	stack<Items>  istack;
+	Items temp(1, 1, E);	// 오른쪽부터 체크하기
+	istack.push(temp);
+
+	int node = 1; // 노드갯수 세기, 시작점 포함 1시작
+
+	while (!istack.empty()) {
+		temp = istack.top();	// 맨위 스택 저장하고
+		istack.pop();			// 삭제하기
+		int i = temp.x; int j = temp.y; int d = temp.dir;
+
+		while (d < 8) {
+			int g = i + m_ove[d].a; int h = j + m_ove[d].b;	// g,h 는 이동후 x,y 좌표
+			if ((g == m) && (h == p)) {
+				cout << istack;
+				node++;			// 도착한것도 노드 1 추가해주기
+				temp.x = i;  temp.y = j; cout << "->" << temp;
+				temp.x = m;  temp.y = p; cout << "->" << temp << endl;	// 마지막꺼 안들어갔으니깐 출력
+				cout << "방문한 노드수 = " << node << endl;
+				return;  // 프로그램 종료
+			}
+			if ((!maze[g][h]) && (!mark[g][h])) { // 둘다 0 이 아닌경우, 방문하지도 않았고, 지도상으로도 0인경우
+				mark[g][h] = 1;	// 방문해서 1찍어주시고
+				node++;			// 방문했으니 node++
+				temp.x = i; temp.y = j; temp.dir = d + 1; // 
+				istack.push(temp);		// 스택에 추가
+				i = g; j = h; d = N;	// (g,h) 로 이동
+			}
+			else d++; // 다음 방향으로 시도
+		}// while
+	}//while
+	cout << "길이 없습니다" << endl;
+}
+
+void getdata(istream& is, int& m, int& p) {
+	is >> m >> p;
+	for (int i = 0; i < m + 2; i++)
+	{ maze[i][0] = 1; maze[i][p + 1] = 1; }		// 왼쪽 벽과 오른쪽 벽 작성
+	for (int j = 1; j <= p; j++)
+	{ maze[0][j] = 1; maze[m + 1][j] = 1; }		// 윗쪽 벽과 아래쪽 벽 작성
+	for (int i = 1; i <= m; i++) {				
+		for (int j = 1; j <= p; j++)			// 자료 읽어들이기
+			is >> maze[i][j];
+	}
 }
