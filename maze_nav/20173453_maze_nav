@@ -1,5 +1,4 @@
 //maze
-
 #include <iostream>
 #include <stack>
 using namespace std;
@@ -11,7 +10,7 @@ enum directions { N, NE, E, SE, S, SW, W, NW };	// enum 사용법
 struct offsets
 {
 	int a, b;
-}m_ove[8] = { -1,0, -1,1, 0,1, 1,1, 1,0, 1,-1, 0,-1, -1,-1 };	// 존나 이해는 안되지만
+}m_ove[8] = { -1,0, -1,1, 0,1, 1,1, 1,0, 1,-1, 0,-1, -1,-1 };
 
 struct Items
 {
@@ -29,7 +28,7 @@ ostream& operator<<(ostream& os, stack<T>& s) {
 	}
 	while (!tmp.empty()) {	// temp의 stack을 출력
 		os << "->";
-		os << tmp.top();	// 이것도 구현해주어야함
+		os << tmp.top();	
 		tmp.pop();
 	}
 	return os;
@@ -61,12 +60,12 @@ void Path(const int m, const int p) {
 				cout << istack;
 				node++;			// 도착한것도 노드 1 추가해주기
 				temp.x = i;  temp.y = j; cout << "->" << temp;
-				temp.x = m;  temp.y = p; cout << "->" << temp << endl;	// 마지막꺼 안들어갔으니깐 출력
+				temp.x = m;  temp.y = p; cout << "->" << temp << endl;
 				cout << "방문한 노드수 = " << node << endl;
 				return;  // 프로그램 종료
 			}
 			if ((!maze[g][h]) && (!mark[g][h])) { // 둘다 0 이 아닌경우, 방문하지도 않았고, 지도상으로도 0인경우
-				mark[g][h] = 1;	// 방문해서 1찍어주시고
+				mark[g][h] = 1;	// 방문해서 1
 				node++;			// 방문했으니 node++
 				temp.x = i; temp.y = j; temp.dir = d + 1; // 
 				istack.push(temp);		// 스택에 추가
@@ -81,14 +80,19 @@ void Path(const int m, const int p) {
 void getdata(istream& is, int& m, int& p) {
 	is >> m >> p;
 	for (int i = 0; i < m + 2; i++)
-	{ maze[i][0] = 1; maze[i][p + 1] = 1; }		// 왼쪽 벽과 오른쪽 벽 작성
+	{
+		maze[i][0] = 1; maze[i][p + 1] = 1;
+	}		// 왼쪽 벽과 오른쪽 벽 작성
 	for (int j = 1; j <= p; j++)
-	{ maze[0][j] = 1; maze[m + 1][j] = 1; }		// 윗쪽 벽과 아래쪽 벽 작성
-	for (int i = 1; i <= m; i++) {				
+	{
+		maze[0][j] = 1; maze[m + 1][j] = 1;
+	}		// 윗쪽 벽과 아래쪽 벽 작성
+	for (int i = 1; i <= m; i++) {
 		for (int j = 1; j <= p; j++)			// 자료 읽어들이기
 			is >> maze[i][j];
 	}
 }
+
 
 //main
 
