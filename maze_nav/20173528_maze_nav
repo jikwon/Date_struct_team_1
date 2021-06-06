@@ -1,4 +1,4 @@
-####Maze.h
+Maze.h
 #pragma once
 #include <iostream>
 #include <fstream>
@@ -65,7 +65,7 @@ public:
 	void Search(); // 미로의 출구를 탐색
 };
 
-####Maze.cpp
+Maze.cpp
 #include "Maze.h"
 
 bool Stack::isFull() {
@@ -156,7 +156,7 @@ void Maze::Search()
 
 }
 
-#MazeTest.cpp
+MazeTest.cpp
 #include "Maze.h"
 
 int main()
