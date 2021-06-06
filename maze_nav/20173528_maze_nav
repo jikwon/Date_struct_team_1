@@ -1,5 +1,7 @@
+####Maze.h
 #pragma once
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -42,7 +44,7 @@ class Maze
 	Location start;
 	Location exit;
 public:
-	Maze(int w, int h)
+	Maze(int w = 0, int h = 0)
 	{
 		width = w;
 		height = h;
@@ -58,4 +60,111 @@ public:
 		}
 		delete[] map;
 	}
+	void Load(char *custmap); // 미로 입력
+	void Print(); // 미로를 화면에 출력
+	void Search(); // 미로의 출구를 탐색
 };
+
+####Maze.cpp
+#include "Maze.h"
+
+bool Stack::isFull() {
+	return top >= length - 1;
+}
+
+bool Stack::isEmpty() {
+	return top == -1;
+}
+
+void Stack::push(int data) {
+	if (!isFull()) {
+		dataArray[++top] = data;
+		size++;
+	}
+	else {
+		throw "Stack is full!!";
+	}
+}
+
+int Stack::pop() {
+	if (!isEmpty()) {
+		size--;
+		return dataArray[top--];
+	}
+	else {
+		throw "Stack is empty!!";
+	}
+}
+
+ostream& operator<<(ostream& os, const Stack& s) {
+	os << "Stack : [ ";
+	for (int i = 0; i <= s.top; i++)
+		os << s.dataArray[i] << " ";
+	os << "]";
+
+	return os;
+}
+
+void Maze::Load(char *custmap)
+{
+    ifstream fin(custmap, ios::in);
+    int temp;
+
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            fin >> temp;
+            map[i][j] = temp;
+        }
+        cout << endl;
+    }
+    fin.close();
+}
+
+void Maze::Print() 
+{
+    cout << "Size of Maze " << height << " * " << width << endl;
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            if (map[i][j] == 1)
+            {
+                cout << "  ";
+            }
+            else if (map[i][j] == 0)
+            {
+                cout << "■";
+            }
+            else if (map[i][j] == 5)
+            {
+                cout << "○";
+            }
+            else if (map[i][j] == 9)
+            {
+                cout << "◎";
+            }
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
+void Maze::Search()
+{
+
+}
+
+#MazeTest.cpp
+#include "Maze.h"
+
+int main()
+{
+	Maze maze(15, 15);
+
+	maze.Load("C:\\Desktop\map1.txt");
+	maze.Print();
+
+	return 0;
+}
