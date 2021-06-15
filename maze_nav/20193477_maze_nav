@@ -1,301 +1,58 @@
-#include <iostream>
-#include <time.h>
-#include <Windows.h>
-
+#include<iostream>
+#include<queue>
 using namespace std;
-#define BLOCK 49
-#define AVAIL 48
-#define CLOSED 88
-#define MOVED 79
+#define MAX_SIZE 101
+int N, M;
+char map[MAX_SIZE][MAX_SIZE];
+bool visit[MAX_SIZE][MAX_SIZE];
+int dx[4] = { 1, -1, 0, 0 };    //동 서 남 북
+int dy[4] = { 0, 0, -1, 1 };    //동 서 남 북
+int rotation[2] = { 0,0 };
+int bfs() {
+    queue<pair<pair<int, int>, int>> q;
+    q.push(make_pair(make_pair(0, 0), 1));    //첫째pair 위치, 둘째pair 움직인거리
+    visit[0][0] = 1;
 
-/* Coloring console text */
-int SetColor(const int TEXT_Color_Code)
-{
-	return SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), TEXT_Color_Code);
+    while (!q.empty()) {
+
+        int x = q.front().first.second;
+        int y = q.front().first.first;
+        int z = q.front().second;
+
+        q.pop();
+
+        if (x == M - 1 && y == N - 1)
+            return z;
+
+        for (int i = 0; i < 4; i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+
+            if (nx < 0 || ny < 0 || nx >= M || ny >= N)
+                continue;
+            if (visit[ny][nx] == 1)
+            {
+                cout << "(" << nx << ", " << ny << ")" << " -> ";
+                continue;
+            }
+            if (map[ny][nx] != '1')
+                continue;
+            q.push(make_pair(make_pair(ny, nx), z + 1));
+            
+            visit[ny][nx] = 1;
+        }
+    }
 }
 
-/* Stack Node */
-typedef struct
-{
-	unsigned int x;
-	unsigned int y;
-}item;
+int main() {
 
-/* Stack class */
-class stack
-{
-protected:
-	item* data; //stack data
-	unsigned int size; //stack size
-	unsigned int top; //stack pointer
-public:
-	void init(); //init stack
-	stack(); //defalut constructor
-	stack(unsigned int asize); //auto create constructor
-	~stack(); //destructor
-	void Create(unsigned int asize); //create stack (memory allocation)
-	void push(unsigned int x, unsigned int y); //data input
-	void push(item crd); //data input (item type) 
-	item pop(); //data delete
-	void clear(); //clear stack
-	bool isEmpty(); //check stack status
-};
+    cin >> N >> M;
 
-void stack::init() //init stack
-{
-	/* default value */
-	size = 0;
-	top = -1;
-	data = NULL;
+    for (int i = 0; i < N; i++) {
+        cin >> map[i];
+    }
+    cout << "최단경로: " << bfs();
+
+    return 0;
 }
 
-stack::stack() //default constructor
-{
-	init();
-}
-
-stack::stack(unsigned int asize) //auto create constructor
-{
-	init();
-	size = asize - 1; //size = max index
-	data = new item[asize]; //memory allocation
-}
-
-stack::~stack() //destructor
-{
-	delete[]data; //delete stack
-}
-
-void stack::Create(unsigned int asize) //create stack
-{
-	size = asize - 1;
-	data = new item[asize];
-}
-
-void stack::push(unsigned int x, unsigned int y) //data input
-{
-	if (top == size) //check stack status
-	{
-		fprintf(stderr, "Stack is full");
-		exit(1);
-	}
-	data[++top].x = x; //data input
-	data[top].y = y;
-}
-
-void stack::push(item crd) //data input (item type)
-{
-	if (top == size)
-	{
-		fprintf(stderr, "Stack is full");
-		exit(1);
-	}
-	data[top].x = crd.x;
-	data[top++].y = crd.y;
-}
-
-item stack::pop() //data delete
-{
-	item r; //return value
-	if (top == -1) //check stack stauts
-	{
-		fprintf(stderr, "Stack is empty");
-		exit(1);
-	}
-	r = data[top--]; //move stack pointer & pop data
-	return r;
-}
-
-void stack::clear() //clear stack
-{
-	while (isEmpty() == false) pop();
-}
-
-bool stack::isEmpty() //check stack status
-{
-	if (top == -1) return true;
-	else return false;
-}
-
-/* Maze class */
-class maze
-{
-protected:
-	char** data; //maze data
-	unsigned int x; //maze width
-	unsigned int y; //maze height
-	item cur; //current coordinate (default : 0,0)
-	stack mov; //coord stack
-public:
-	maze(unsigned int ax, unsigned int ay); //auto craete constructor
-	~maze(); //destructor
-	void printOut(); //print maze data
-	void reset(); //reset maze data
-	bool available(int ax, int ay); //coordinate is available?
-	bool escape(); //escape maze
-};
-
-maze::maze(unsigned int ax, unsigned int ay) //auto craete constructor
-{
-	unsigned int i, j, t;
-	mov.Create(ax * ay); //create stack
-	x = ax; //set width
-	y = ay; //set height
-	srand(time(NULL)); //random seed
-	/* memory allocation (double pointer) */
-	data = new char* [ay];
-	for (i = 0; i < ay; i++)
-	{
-		data[i] = new char[ax];
-		for (j = 0; j < ax; j++)
-		{
-			t = rand() % 2;
-			if (t == 0) data[i][j] = AVAIL; //set data (TRUE)
-			else data[i][j] = BLOCK; //set data (FALSE)
-		}
-	}
-	/* 입구와 출구는 항상 열려 있어야 한다 */
-	data[0][0] = AVAIL;
-	data[ay - 1][ax - 1] = AVAIL;
-}
-
-void maze::reset() //reset maze data
-{
-	unsigned int i, j, t;
-	srand(time(NULL));
-	for (i = 0; i < x; i++)
-		for (j = 0; j < y; j++)
-		{
-			t = rand() % 2;
-			if (t == 0) data[i][j] = AVAIL; //set data (TRUE)
-			else data[i][j] = BLOCK; //set data (FALSE)
-		}
-	/* 입구와 출구는 항상 열려 있어야 한다 */
-	data[0][0] = AVAIL;
-	data[y - 1][x - 1] = AVAIL;
-}
-
-maze::~maze() //destructor
-{
-	unsigned int i;
-	/* delete maze data (stack is automatic deletion) */
-	for (i = 0; i < x; i++) delete[]data[i];
-	delete[]data;
-}
-
-void maze::printOut() //print maze data
-{
-	unsigned int i, j;
-	for (i = 0; i < y; i++)
-	{
-		for (j = 0; j < x; j++)
-		{
-			/* set color */
-			if (data[i][j] == AVAIL) SetColor(15); //지나갈 수 있는 좌표 (AVAIL), 흰색 0으로 표기
-			else if (data[i][j] == MOVED) SetColor(10); //탈출로 (지나온 AVAIL 좌표), 연두색 O로 표기 - 탈출에 성공한 경우만 보이게 될 것.
-			else if (data[i][j] == CLOSED) SetColor(12); //잘못된 길 (막힌 길), 빨간색 X로 표기
-			else SetColor(7); //지나갈 수 없는 좌표 (BLOCK), 회색 1로 표기
-			cout << data[i][j]; //data output
-		}
-		cout << endl;
-	}
-	SetColor(7); //set default color
-}
-
-bool maze::escape() //escape maze
-{
-	int ex = x - 1; //Coord of Exit
-	int ey = y - 1;
-	cur.x = 0; //default value of current coordinate
-	cur.y = 0;
-	while (!(cur.x == ex && cur.y == ey)) //출구 좌표로 cur(현재 좌표)가 이동할 때 까지 반복
-	{
-		mov.push(cur.x, cur.y); //push data to stack
-		data[cur.y][cur.x] = MOVED; //set data(coord) status (escape maze using this coordinate)
-		if (available(cur.x + 1, cur.y)) //East (available 함수로 해당 좌표를 체크한 뒤 이동 가능한 좌표일 시 해당 좌표로 이동)
-		{
-			cur.x++;
-		}
-		else if (available(cur.x + 1, cur.y + 1)) //South-East
-		{
-			cur.x++;
-			cur.y++;
-		}
-		else if (available(cur.x, cur.y + 1)) //South
-		{
-			cur.y++;
-		}
-		else if (available(cur.x - 1, cur.y + 1)) //South-West
-		{
-			cur.x--;
-			cur.y++;
-		}
-		else if (available(cur.x - 1, cur.y)) //West
-		{
-			cur.x--;
-		}
-		else if (available(cur.x - 1, cur.y - 1)) //North-West
-		{
-			cur.x--;
-			cur.y--;
-		}
-		else if (available(cur.x, cur.y - 1)) //North
-		{
-			cur.y--;
-		}
-		else if (available(cur.x + 1, cur.y - 1)) //North-East
-		{
-			cur.x++;
-			cur.y--;
-		}
-		else //어느 쪽으로도 이동할 수 없다! - Stack으로부터 이전 좌표를 pop하여 돌아간다.
-		{
-			data[cur.y][cur.x] = CLOSED; //current coord is wrong. 
-			cur = mov.pop(); //pop this coord from stack. (이번 루프에 push된 좌표 값)
-			if (mov.isEmpty() == true) return false; //check stack status. if stack is empty, return false.(cannot escape maze)
-			cur = mov.pop(); //Go to the previous coord.
-		}
-	}
-	//end of loop (arrive in exit)
-	data[cur.y][cur.x] = MOVED;
-	mov.clear();
-	return true; //return true
-}
-
-bool maze::available(int ax, int ay) //coordinate is available?
-{
-	if (ax < 0 || ay < 0) return false; //좌표가 음수면 사용할 수 없는 좌표이므로 false
-	else if (ax == x || ay == y) return false; //좌표가 width, height와 같아지면 index 범위를 벗어나므로 false
-	else if (data[ay][ax] == AVAIL) return true; //좌표의 데이터 값이 AVAIL, 지나갈 수 있는 좌표면 true
-	else return false; //지나갈 수 없다. false
-}
-
-int main()
-{
-	maze t(16, 16); //미로 생성.. 사이즈는 마음대로... 
-	while (1)
-	{
-		if (t.escape())
-		{
-			cout << "생성된 미로 (랜덤)" << endl;
-			t.printOut(); //미로 보여줌
-			SetColor(10);
-			cout << "미로를 탈출하였습니다." << endl; //미로 탈출에 성공했다!
-			t.printOut(); //과정을 보여준다.
-		}
-		else
-		{
-			cout << "미로를 만드는 중입니다" << endl;
-			SetColor(7);
-			t.reset();
-			system("cls");
-			continue;
-		}
-		SetColor(7);
-		cout << "▶ 미로 다시 만들기 (아무 키나 누르세요)" << endl;
-		system("pause >nul");
-		t.reset();
-		system("cls");
-	}
-	return 0;
-}
